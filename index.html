@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101418">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<title>MockMitra Ledger</title>
+<style>
+  :root{
+    --bg:#101418; --panel:#181e25; --panel2:#1f2730; --line:#2a333e;
+    --ink:#e8edf2; --dim:#8a97a5; --green:#3ecf8e; --red:#ff6b6b; --amber:#f5c451;
+    --mono:'SF Mono',ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:-apple-system,'Segoe UI',Roboto,sans-serif;min-height:100vh;padding:16px;padding-bottom:32px}
+  .wrap{max-width:860px;margin:0 auto}
+  h1{font-size:18px;letter-spacing:.5px;font-weight:600}
+  h1 span{color:var(--dim);font-weight:400}
+  header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+  select,input,button{font:inherit;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 12px;outline:none}
+  select:focus,input:focus{border-color:#4a5a6a}
+  button{cursor:pointer}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .card .lbl{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin-bottom:6px}
+  .card .val{font-family:var(--mono);font-size:22px;font-weight:600}
+  .card .sub{font-size:11px;color:var(--dim);margin-top:4px;font-family:var(--mono)}
+  .val.pos{color:var(--green)} .val.neg{color:var(--red)}
+  .add{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:16px}
+  .add .row{display:flex;gap:8px;flex-wrap:wrap}
+  .add .row>*{flex:1;min-width:110px}
+  .toggle{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex:0 0 auto}
+  .toggle button{border:none;border-radius:0;background:transparent;padding:9px 16px;color:var(--dim)}
+  .toggle button.on-exp{background:#3a2226;color:var(--red)}
+  .toggle button.on-inc{background:#1d3a2d;color:var(--green)}
+  #addBtn{background:#2b6cb0;border-color:#2b6cb0;font-weight:600;flex:0 0 auto;min-width:90px}
+  #addBtn:active{transform:scale(.98)}
+  .cats{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:16px}
+  .cats h2,.ledger h2{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin-bottom:10px}
+  .catrow{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:13px}
+  .catrow .name{width:92px;flex-shrink:0}
+  .catrow .bar{flex:1;height:8px;background:var(--panel2);border-radius:4px;overflow:hidden}
+  .catrow .bar i{display:block;height:100%;background:var(--amber);border-radius:4px}
+  .catrow .amt{font-family:var(--mono);width:96px;text-align:right;color:var(--dim)}
+  .ledger{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .tx{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--line);font-size:14px}
+  .tx:last-child{border-bottom:none}
+  .tx .date{font-family:var(--mono);font-size:12px;color:var(--dim);width:64px;flex-shrink:0}
+  .tx .cat{background:var(--pan2, var(--panel2));background:var(--panel2);border-radius:6px;padding:2px 8px;font-size:12px;flex-shrink:0}
+  .tx .note{color:var(--dim);font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tx .amt{font-family:var(--mono);font-weight:600;flex-shrink:0}
+  .tx .amt.inc{color:var(--green)} .tx .amt.exp{color:var(--red)}
+  .tx .del{background:none;border:none;color:var(--dim);padding:2px 6px;font-size:15px;flex-shrink:0}
+  .tx .del:hover{color:var(--red)}
+  .empty{color:var(--dim);font-size:13px;padding:16px 4px;text-align:center}
+  .foot{display:flex;justify-content:center;gap:8px;margin-top:14px;flex-wrap:wrap}
+  .foot button{font-size:12px;padding:6px 12px;color:var(--dim)}
+  .status{font-size:11px;color:var(--dim);text-align:center;margin-top:10px}
+  @media(max-width:560px){
+    .cards{grid-template-columns:1fr 1fr}
+    .card:first-child{grid-column:1/-1}
+    .tx .note{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>MockMitra <span>Ledger</span></h1>
+    <select id="monthFilter"></select>
+  </header>
+
+  <div class="cards">
+    <div class="card"><div class="lbl">Net (Return)</div><div class="val" id="netVal">₹0</div><div class="sub" id="netSub"></div></div>
+    <div class="card"><div class="lbl">Income</div><div class="val pos" id="incVal">₹0</div><div class="sub" id="incCount"></div></div>
+    <div class="card"><div class="lbl">Spent</div><div class="val neg" id="expVal">₹0</div><div class="sub" id="expCount"></div></div>
+  </div>
+
+  <div class="add">
+    <div class="row" style="margin-bottom:8px">
+      <div class="toggle" id="typeToggle">
+        <button id="btnExp" class="on-exp">Expense</button>
+        <button id="btnInc">Income</button>
+      </div>
+      <select id="catSel"></select>
+      <input type="number" id="amtIn" placeholder="₹ Amount" min="0" step="0.01" inputmode="decimal">
+      <input type="date" id="dateIn">
+    </div>
+    <div class="row">
+      <input type="text" id="noteIn" placeholder="Note (optional) — e.g. user@gmail.com Elite annual">
+      <button id="addBtn">Add</button>
+    </div>
+  </div>
+
+  <div class="cats">
+    <h2>Spend by category <span id="catScope"></span></h2>
+    <div id="catList"></div>
+  </div>
+
+  <div class="ledger">
+    <h2>Transactions <span id="txScope"></span></h2>
+    <div id="txList"></div>
+  </div>
+
+  <div class="foot">
+    <button id="exportBtn">Export backup</button>
+    <button id="importBtn">Import backup</button>
+    <input type="file" id="importFile" accept=".json" style="display:none">
+  </div>
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+const EXP_CATS = ['Lovable','Gemini','GPT','Claude','Cloudinary','GoDaddy','Creator/Ads','Razorpay fees','Other'];
+const INC_CATS = ['Starter ₹99','Pro ₹149','Elite ₹249','Annual','Other income'];
+const KEY = 'mockmitra-ledger-v1';
+let txs = [];
+let type = 'exp';
+
+const $ = id => document.getElementById(id);
+const fmt = n => '₹' + n.toLocaleString('en-IN', {maximumFractionDigits: 2});
+
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+function setType(t){
+  type = t;
+  $('btnExp').className = t==='exp' ? 'on-exp' : '';
+  $('btnInc').className = t==='inc' ? 'on-inc' : '';
+  const cats = t==='exp' ? EXP_CATS : INC_CATS;
+  $('catSel').innerHTML = cats.map(c=>`<option>${c}</option>`).join('');
+}
+
+function load(){
+  try{
+    txs = JSON.parse(localStorage.getItem(KEY)) || [];
+  }catch(e){ txs = []; }
+  $('status').textContent = txs.length + ' entries · stored on this device';
+  render();
+}
+
+function save(){
+  try{
+    localStorage.setItem(KEY, JSON.stringify(txs));
+    $('status').textContent = 'Saved · ' + txs.length + ' entries · stored on this device';
+  }catch(e){
+    $('status').textContent = 'Save failed — storage full or blocked';
+  }
+}
+
+function monthLabel(m){
+  const [y,mo] = m.split('-');
+  return new Date(y, mo-1, 1).toLocaleString('en-IN',{month:'short', year:'numeric'});
+}
+
+function buildMonthFilter(){
+  const months = [...new Set(txs.map(t=>t.date.slice(0,7)))].sort().reverse();
+  const cur = $('monthFilter').value || 'all';
+  let html = '<option value="all">All time</option>';
+  html += months.map(m=>`<option value="${m}">${monthLabel(m)}</option>`).join('');
+  $('monthFilter').innerHTML = html;
+  $('monthFilter').value = months.includes(cur) || cur==='all' ? cur : 'all';
+}
+
+function render(){
+  buildMonthFilter();
+  const f = $('monthFilter').value;
+  const list = f==='all' ? txs : txs.filter(t=>t.date.slice(0,7)===f);
+  const scopeTxt = f==='all' ? '· all time' : '· '+monthLabel(f);
+  $('catScope').textContent = scopeTxt;
+  $('txScope').textContent = scopeTxt;
+
+  const inc = list.filter(t=>t.type==='inc').reduce((s,t)=>s+t.amount,0);
+  const exp = list.filter(t=>t.type==='exp').reduce((s,t)=>s+t.amount,0);
+  const net = inc - exp;
+  $('incVal').textContent = fmt(inc);
+  $('expVal').textContent = fmt(exp);
+  $('netVal').textContent = (net<0?'−':'')+fmt(Math.abs(net));
+  $('netVal').className = 'val ' + (net>=0?'pos':'neg');
+  $('netSub').textContent = exp>0 ? 'Return: '+(inc/exp*100).toFixed(0)+'% of spend recovered' : '';
+  $('incCount').textContent = list.filter(t=>t.type==='inc').length+' payments';
+  $('expCount').textContent = list.filter(t=>t.type==='exp').length+' expenses';
+
+  const byCat = {};
+  list.filter(t=>t.type==='exp').forEach(t=>{ byCat[t.cat]=(byCat[t.cat]||0)+t.amount; });
+  const entries = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  const max = entries.length ? entries[0][1] : 1;
+  $('catList').innerHTML = entries.length
+    ? entries.map(([c,v])=>`<div class="catrow"><div class="name">${c}</div><div class="bar"><i style="width:${(v/max*100).toFixed(1)}%"></i></div><div class="amt">${fmt(v)}</div></div>`).join('')
+    : '<div class="empty">No expenses in this period</div>';
+
+  const sorted = [...list].sort((a,b)=> b.date.localeCompare(a.date) || b.id - a.id);
+  $('txList').innerHTML = sorted.length
+    ? sorted.map(t=>`<div class="tx">
+        <div class="date">${t.date.slice(5).replace('-','/')}<br>${t.date.slice(0,4)}</div>
+        <div class="cat">${t.cat}</div>
+        <div class="note">${t.note ? t.note.replace(/</g,'&lt;') : ''}</div>
+        <div class="amt ${t.type}">${t.type==='inc'?'+':'−'}${fmt(t.amount)}</div>
+        <button class="del" data-id="${t.id}" title="Delete">✕</button>
+      </div>`).join('')
+    : '<div class="empty">No transactions yet. Add your first one above.</div>';
+}
+
+$('btnExp').onclick = ()=>setType('exp');
+$('btnInc').onclick = ()=>setType('inc');
+$('monthFilter').onchange = render;
+
+$('addBtn').onclick = ()=>{
+  const amt = parseFloat($('amtIn').value);
+  if(!amt || amt<=0){ $('amtIn').focus(); return; }
+  txs.push({
+    id: Date.now(),
+    type,
+    cat: $('catSel').value,
+    amount: amt,
+    date: $('dateIn').value || todayStr(),
+    note: $('noteIn').value.trim()
+  });
+  $('amtIn').value=''; $('noteIn').value='';
+  save(); render();
+};
+
+$('txList').onclick = e=>{
+  const btn = e.target.closest('.del');
+  if(!btn) return;
+  const id = Number(btn.dataset.id);
+  const t = txs.find(x=>x.id===id);
+  if(t && confirm('Delete '+(t.type==='inc'?'+':'−')+fmt(t.amount)+' ('+t.cat+')?')){
+    txs = txs.filter(x=>x.id!==id);
+    save(); render();
+  }
+};
+
+$('exportBtn').onclick = ()=>{
+  const blob = new Blob([JSON.stringify(txs, null, 1)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'mockmitra-ledger-backup-' + todayStr() + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+$('importBtn').onclick = ()=> $('importFile').click();
+$('importFile').onchange = e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const r = new FileReader();
+  r.onload = ()=>{
+    try{
+      const data = JSON.parse(r.result);
+      if(!Array.isArray(data)) throw 0;
+      if(confirm('Replace current ' + txs.length + ' entries with ' + data.length + ' from backup?')){
+        txs = data; save(); render();
+      }
+    }catch(_){ alert('Not a valid backup file.'); }
+  };
+  r.readAsText(file);
+  e.target.value = '';
+};
+
+$('amtIn').addEventListener('keydown', e=>{ if(e.key==='Enter') $('addBtn').click(); });
+$('noteIn').addEventListener('keydown', e=>{ if(e.key==='Enter') $('addBtn').click(); });
+
+$('dateIn').value = todayStr();
+setType('exp');
+load();
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
