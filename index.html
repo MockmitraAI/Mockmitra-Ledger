@@ -8,270 +8,88 @@
 <link rel="icon" href="icon-192.png">
 <title>MockMitra Ledger</title>
 <style>
-  :root{
-    --bg:#101418; --panel:#181e25; --panel2:#1f2730; --line:#2a333e;
-    --ink:#e8edf2; --dim:#8a97a5; --green:#3ecf8e; --red:#ff6b6b; --amber:#f5c451;
-    --mono:'SF Mono',ui-monospace,Menlo,Consolas,monospace;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font-family:-apple-system,'Segoe UI',Roboto,sans-serif;min-height:100vh;padding:16px;padding-bottom:32px}
-  .wrap{max-width:860px;margin:0 auto}
-  h1{font-size:18px;letter-spacing:.5px;font-weight:600}
-  h1 span{color:var(--dim);font-weight:400}
-  header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px}
-  select,input,button{font:inherit;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 12px;outline:none}
-  select:focus,input:focus{border-color:#4a5a6a}
-  button{cursor:pointer}
-  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
-  .card .lbl{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin-bottom:6px}
-  .card .val{font-family:var(--mono);font-size:22px;font-weight:600}
-  .card .sub{font-size:11px;color:var(--dim);margin-top:4px;font-family:var(--mono)}
-  .val.pos{color:var(--green)} .val.neg{color:var(--red)}
-  .add{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:16px}
-  .add .row{display:flex;gap:8px;flex-wrap:wrap}
-  .add .row>*{flex:1;min-width:110px}
-  .toggle{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex:0 0 auto}
-  .toggle button{border:none;border-radius:0;background:transparent;padding:9px 16px;color:var(--dim)}
-  .toggle button.on-exp{background:#3a2226;color:var(--red)}
-  .toggle button.on-inc{background:#1d3a2d;color:var(--green)}
-  #addBtn{background:#2b6cb0;border-color:#2b6cb0;font-weight:600;flex:0 0 auto;min-width:90px}
-  #addBtn:active{transform:scale(.98)}
-  .cats{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:16px}
-  .cats h2,.ledger h2{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin-bottom:10px}
-  .catrow{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:13px}
-  .catrow .name{width:92px;flex-shrink:0}
-  .catrow .bar{flex:1;height:8px;background:var(--panel2);border-radius:4px;overflow:hidden}
-  .catrow .bar i{display:block;height:100%;background:var(--amber);border-radius:4px}
-  .catrow .amt{font-family:var(--mono);width:96px;text-align:right;color:var(--dim)}
-  .ledger{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
-  .tx{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--line);font-size:14px}
-  .tx:last-child{border-bottom:none}
-  .tx .date{font-family:var(--mono);font-size:12px;color:var(--dim);width:64px;flex-shrink:0}
-  .tx .cat{background:var(--pan2, var(--panel2));background:var(--panel2);border-radius:6px;padding:2px 8px;font-size:12px;flex-shrink:0}
-  .tx .note{color:var(--dim);font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .tx .amt{font-family:var(--mono);font-weight:600;flex-shrink:0}
-  .tx .amt.inc{color:var(--green)} .tx .amt.exp{color:var(--red)}
-  .tx .del{background:none;border:none;color:var(--dim);padding:2px 6px;font-size:15px;flex-shrink:0}
-  .tx .del:hover{color:var(--red)}
-  .empty{color:var(--dim);font-size:13px;padding:16px 4px;text-align:center}
-  .foot{display:flex;justify-content:center;gap:8px;margin-top:14px;flex-wrap:wrap}
-  .foot button{font-size:12px;padding:6px 12px;color:var(--dim)}
-  .status{font-size:11px;color:var(--dim);text-align:center;margin-top:10px}
-  @media(max-width:560px){
-    .cards{grid-template-columns:1fr 1fr}
-    .card:first-child{grid-column:1/-1}
-    .tx .note{display:none}
-  }
+:root{--bg:#101418;--panel:#181e25;--panel2:#1f2730;--line:#2a333e;--ink:#e8edf2;--dim:#8a97a5;--green:#3ecf8e;--red:#ff6b6b;--amber:#f5c451;--blue:#4b91dc;--mono:'SF Mono',ui-monospace,Menlo,Consolas,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}body{background:var(--bg);color:var(--ink);font-family:-apple-system,'Segoe UI',Roboto,sans-serif;padding:16px;overflow:hidden}
+button,input,select{font:inherit;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:8px;min-height:44px;padding:9px 12px;outline:none}button{cursor:pointer;transition:transform .12s,background .2s,color .2s,border-color .2s}button:active{transform:scale(.97)}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--blue);outline-offset:2px}input:focus,select:focus{border-color:#4a5a6a}
+.wrap{max-width:920px;height:calc(100vh - 32px);margin:auto;display:grid;grid-template-rows:auto auto auto auto minmax(170px,1fr) auto;gap:12px}.wrap>*{animation:fade .25s ease both}@keyframes fade{from{opacity:0;transform:translateY(4px)}}
+header{display:flex;justify-content:space-between;align-items:center;gap:10px}h1{font-size:18px;letter-spacing:.5px;font-weight:600}h1 span{color:var(--dim);font-weight:400}.header-tools{display:flex;align-items:center;gap:8px}.network{font-size:11px;color:var(--dim);display:flex;align-items:center;gap:5px}.network:before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green)}.network.offline:before{background:var(--red)}
+.cards{position:sticky;top:0;z-index:3;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.card,.add,.cats,.ledger{background:var(--panel);border:1px solid var(--line);border-radius:12px}.card{padding:12px 16px}.lbl,.section-title{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--dim)}.card .lbl{margin-bottom:5px}.val{font-family:var(--mono);font-size:21px;font-weight:600}.sub{font-size:11px;color:var(--dim);margin-top:3px;font-family:var(--mono)}.pos{color:var(--green)}.neg{color:var(--red)}
+.add{padding:12px;transition:border-color .25s,box-shadow .25s}.add.editing{border-color:var(--amber);box-shadow:0 0 0 2px #f5c45118}.edit-banner{display:none;color:var(--amber);font-size:12px;margin:0 2px 9px}.editing .edit-banner{display:flex;align-items:center;justify-content:space-between}.row{display:flex;gap:8px;flex-wrap:wrap}.row+.row{margin-top:8px}.row>*{flex:1;min-width:110px}.toggle{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex:0 0 auto;min-height:44px}.toggle button{border:0;border-radius:0;background:transparent;color:var(--dim);min-height:42px}.toggle .on-exp{background:#3a2226;color:var(--red)}.toggle .on-inc{background:#1d3a2d;color:var(--green)}#submitBtn{background:#2b6cb0;border-color:#2b6cb0;font-weight:600;flex:0 0 auto;min-width:92px}.cancel{background:transparent;color:var(--dim);min-height:32px;padding:4px 8px}
+.cats{padding:12px}.section-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}.section-title span{font-weight:400;text-transform:none;letter-spacing:0}.collapse-btn{min-height:32px;padding:3px 9px;background:transparent;color:var(--dim);font-size:12px}.cats.collapsed .cat-content{display:none}.insights{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:9px}.insight{background:var(--panel2);border-radius:8px;padding:8px;min-width:0}.insight b{display:block;font:600 12px var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.insight span{display:block;margin-top:3px;color:var(--dim);font-size:9px;text-transform:uppercase;letter-spacing:.5px}.catrow{display:grid;grid-template-columns:100px 1fr 42px 98px;align-items:center;gap:9px;padding:4px 0;font-size:12px}.catrow .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bar{height:8px;background:var(--panel2);border-radius:5px;overflow:hidden}.bar i{display:block;height:100%;background:var(--amber);border-radius:5px;animation:grow .45s ease both;transform-origin:left}@keyframes grow{from{transform:scaleX(0)}}.pct,.catrow .amt{font-family:var(--mono);text-align:right;color:var(--dim)}
+.ledger{padding:12px;display:flex;min-height:0;flex-direction:column}.ledger-tools{display:grid;grid-template-columns:minmax(140px,1fr) auto;gap:8px;margin-bottom:8px}.search-wrap{position:relative}.search-wrap input{width:100%;padding-left:36px}.search-wrap:before{content:'⌕';position:absolute;left:12px;top:9px;color:var(--dim);font-size:20px}.filters{display:flex;gap:8px}.filters select{min-width:120px}.quick-filters{display:flex;gap:6px;overflow-x:auto;grid-column:1/-1;scrollbar-width:none}.quick-filters::-webkit-scrollbar{display:none}.chip{min-height:34px;padding:5px 11px;border-radius:999px;white-space:nowrap;color:var(--dim);font-size:11px}.chip.active{color:var(--ink);border-color:var(--blue);background:#2b6cb033}.tx-list{overflow:auto;min-height:0;scrollbar-color:var(--line) transparent}.tx{display:grid;grid-template-columns:70px minmax(90px,auto) minmax(60px,1fr) auto 44px 44px;align-items:center;gap:8px;padding:9px 2px;border-bottom:1px solid var(--line);font-size:14px;transition:opacity .2s,transform .2s,background .2s;animation:slide .22s ease both}.tx:hover{background:#ffffff04}.tx:active{background:#ffffff07}.tx.removing{opacity:0;transform:translateX(18px)}@keyframes slide{from{opacity:0;transform:translateX(-6px)}}.date{font:11px var(--mono);color:var(--dim)}.cat{background:var(--panel2);border-radius:999px;padding:4px 9px;font-size:11px;width:max-content;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.note{color:var(--dim);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.amt{font:600 13px var(--mono);white-space:nowrap}.icon-btn{background:transparent;border:1px solid transparent;padding:0;min-height:44px;min-width:44px;font-size:19px;color:var(--dim)}.edit:hover{color:var(--amber);background:#f5c45110}.del:hover{color:var(--red);background:#ff6b6b10}mark{background:#f5c45135;color:inherit;border-radius:2px}.empty{color:var(--dim);font-size:13px;padding:24px 6px;text-align:center}.empty:before{content:'◇';display:block;font-size:32px;color:#46515d;margin-bottom:7px}.empty strong{display:block;color:var(--ink);font-size:14px;margin-bottom:3px}
+.foot{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap}.foot button{font-size:12px;color:var(--dim)}.status{font-size:11px;color:var(--dim);margin-left:auto}.fab{display:none;position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));z-index:10;width:52px;height:52px;border-radius:50%;padding:0;background:var(--blue);border-color:var(--blue);font-size:25px;box-shadow:0 8px 24px #0008}.snackbar{position:fixed;z-index:20;left:50%;bottom:18px;transform:translate(-50%,130%);opacity:0;background:#2a333e;border:1px solid #45515e;border-radius:10px;box-shadow:0 10px 30px #0008;padding:11px 14px;min-width:250px;display:flex;align-items:center;justify-content:space-between;gap:18px;transition:.24s ease}.snackbar.show{transform:translate(-50%,0);opacity:1}.snackbar button{border:0;background:transparent;color:var(--amber);font-weight:700;padding:0;min-height:32px}
+@media(max-width:650px){html,body{height:auto;min-height:100%}body{padding:10px;padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right));overflow:auto}.wrap{height:auto;min-height:calc(100dvh - 20px);display:flex;flex-direction:column;gap:9px}.cards{top:0;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.card{padding:9px 7px;border-radius:10px}.card .lbl{font-size:9px;letter-spacing:.6px}.val{font-size:clamp(13px,4.2vw,18px);overflow:hidden;text-overflow:ellipsis}.sub{display:none}.add{padding:10px}.row>*{min-width:calc(50% - 5px)}.row #noteIn{min-width:100%}.row #submitBtn{width:100%;flex-basis:100%}.cats{padding:10px}.insights{grid-template-columns:repeat(2,1fr)}.catrow{grid-template-columns:minmax(70px,90px) 1fr 32px 72px;gap:5px}.catrow .amt{font-size:10px}.ledger{padding:10px;min-height:420px;max-height:65dvh}.ledger-tools{grid-template-columns:1fr}.filters select{flex:1;min-width:0;max-width:50%}.tx{grid-template-columns:48px minmax(60px,1fr) auto 44px 44px;gap:3px;padding:8px 0}.tx .note{display:none}.tx .cat{max-width:34vw;padding:4px 7px}.tx .amt{font-size:12px}.network{display:none}.foot{justify-content:flex-start;overflow-x:auto;flex-wrap:nowrap;padding-right:60px}.foot button{flex:0 0 auto}.status{display:none}.fab{display:block}.snackbar{bottom:max(82px,calc(env(safe-area-inset-bottom) + 70px));width:calc(100% - 24px);min-width:0}}
+@media(max-width:390px){body{padding:7px}.cards{gap:4px}.card{padding:8px 5px}.add .row>*{min-width:100%}.toggle{width:100%}.toggle button{flex:1}.filters{display:grid;grid-template-columns:1fr 1fr}.filters select{max-width:none;width:100%}.tx{grid-template-columns:44px minmax(50px,1fr) auto 42px 42px}.date{font-size:10px}}
+@media(min-width:651px) and (max-height:720px){.cats{display:none}.wrap{grid-template-rows:auto auto auto minmax(180px,1fr) auto}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>MockMitra <span>Ledger</span></h1>
-    <select id="monthFilter"></select>
-  </header>
-
-  <div class="cards">
+<main class="wrap">
+  <header><h1>MockMitra <span>Ledger</span></h1><div class="header-tools"><span id="network" class="network">Online</span><select id="monthFilter" aria-label="Filter by month"></select></div></header>
+  <section class="cards" aria-label="Summary">
     <div class="card"><div class="lbl">Net (Return)</div><div class="val" id="netVal">₹0</div><div class="sub" id="netSub"></div></div>
     <div class="card"><div class="lbl">Income</div><div class="val pos" id="incVal">₹0</div><div class="sub" id="incCount"></div></div>
     <div class="card"><div class="lbl">Spent</div><div class="val neg" id="expVal">₹0</div><div class="sub" id="expCount"></div></div>
-  </div>
-
-  <div class="add">
-    <div class="row" style="margin-bottom:8px">
-      <div class="toggle" id="typeToggle">
-        <button id="btnExp" class="on-exp">Expense</button>
-        <button id="btnInc">Income</button>
-      </div>
-      <select id="catSel"></select>
-      <input type="number" id="amtIn" placeholder="₹ Amount" min="0" step="0.01" inputmode="decimal">
-      <input type="date" id="dateIn">
-    </div>
-    <div class="row">
-      <input type="text" id="noteIn" placeholder="Note (optional) — e.g. user@gmail.com Elite annual">
-      <button id="addBtn">Add</button>
-    </div>
-  </div>
-
-  <div class="cats">
-    <h2>Spend by category <span id="catScope"></span></h2>
-    <div id="catList"></div>
-  </div>
-
-  <div class="ledger">
-    <h2>Transactions <span id="txScope"></span></h2>
-    <div id="txList"></div>
-  </div>
-
-  <div class="foot">
-    <button id="exportBtn">Export backup</button>
-    <button id="importBtn">Import backup</button>
-    <input type="file" id="importFile" accept=".json" style="display:none">
-  </div>
-  <div class="status" id="status"></div>
-</div>
-
+  </section>
+  <section class="add" id="formCard">
+    <div class="edit-banner"><strong>Editing transaction</strong><button class="cancel" id="cancelEdit" type="button">Cancel edit</button></div>
+    <form id="txForm">
+      <div class="row"><div class="toggle" id="typeToggle"><button id="btnExp" type="button">Expense</button><button id="btnInc" type="button">Income</button></div><select id="catSel" aria-label="Category"></select><input type="number" id="amtIn" placeholder="₹ Amount" min="0" step="0.01" inputmode="decimal" required><input type="date" id="dateIn" required></div>
+      <div class="row"><input type="text" id="noteIn" placeholder="Note (optional) — e.g. Elite annual"><button id="submitBtn" type="submit">Add</button></div>
+    </form>
+  </section>
+  <section class="cats" id="catsCard"><div class="section-head"><h2 class="section-title">Spend by category <span id="catScope"></span></h2><button id="collapseCats" class="collapse-btn" type="button" aria-expanded="true">Hide</button></div><div class="cat-content"><div class="insights" id="insights"></div><div id="catList"></div></div></section>
+  <section class="ledger"><div class="section-head"><h2 class="section-title">Transactions <span id="txScope"></span></h2><span class="section-title" id="resultCount"></span></div><div class="ledger-tools"><div class="search-wrap"><input id="searchIn" type="search" placeholder="Search category, note, amount or date" aria-label="Search transactions"></div><div class="filters"><select id="typeFilter" aria-label="Filter by type"><option value="all">All types</option><option value="inc">Income only</option><option value="exp">Expense only</option></select><select id="sortSel" aria-label="Sort transactions"><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="highest">Highest amount</option><option value="lowest">Lowest amount</option><option value="category">Category</option></select></div><div class="quick-filters" id="quickFilters" aria-label="Quick date filters"><button class="chip active" data-range="all">All</button><button class="chip" data-range="today">Today</button><button class="chip" data-range="week">This week</button><button class="chip" data-range="month">This month</button><button class="chip" data-range="lastMonth">Last month</button></div></div><div id="txList" class="tx-list" aria-live="polite"></div></section>
+  <footer class="foot"><button id="exportBtn">Export backup</button><button id="importBtn">Import backup</button><button id="csvExportBtn">Export CSV</button><button id="csvImportBtn">Import CSV</button><input type="file" id="importFile" accept=".json,application/json" hidden><input type="file" id="csvFile" accept=".csv,text/csv" hidden><span class="status" id="status"></span></footer>
+</main>
+<button id="fab" class="fab" type="button" aria-label="Add a transaction">+</button>
+<div id="snackbar" class="snackbar" role="status" aria-live="polite"><span id="snackText"></span><button id="snackAction" hidden></button></div>
 <script>
-const EXP_CATS = ['Lovable','Gemini','GPT','Claude','Cloudinary','GoDaddy','Creator/Ads','Razorpay fees','Other'];
-const INC_CATS = ['Starter ₹99','Pro ₹149','Elite ₹249','Annual','Other income'];
-const KEY = 'mockmitra-ledger-v1';
-let txs = [];
-let type = 'exp';
-
-const $ = id => document.getElementById(id);
-const fmt = n => '₹' + n.toLocaleString('en-IN', {maximumFractionDigits: 2});
-
-function todayStr(){
-  const d = new Date();
-  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-}
-
-function setType(t){
-  type = t;
-  $('btnExp').className = t==='exp' ? 'on-exp' : '';
-  $('btnInc').className = t==='inc' ? 'on-inc' : '';
-  const cats = t==='exp' ? EXP_CATS : INC_CATS;
-  $('catSel').innerHTML = cats.map(c=>`<option>${c}</option>`).join('');
-}
-
-function load(){
-  try{
-    txs = JSON.parse(localStorage.getItem(KEY)) || [];
-  }catch(e){ txs = []; }
-  $('status').textContent = txs.length + ' entries · stored on this device';
-  render();
-}
-
-function save(){
-  try{
-    localStorage.setItem(KEY, JSON.stringify(txs));
-    $('status').textContent = 'Saved · ' + txs.length + ' entries · stored on this device';
-  }catch(e){
-    $('status').textContent = 'Save failed — storage full or blocked';
-  }
-}
-
-function monthLabel(m){
-  const [y,mo] = m.split('-');
-  return new Date(y, mo-1, 1).toLocaleString('en-IN',{month:'short', year:'numeric'});
-}
-
-function buildMonthFilter(){
-  const months = [...new Set(txs.map(t=>t.date.slice(0,7)))].sort().reverse();
-  const cur = $('monthFilter').value || 'all';
-  let html = '<option value="all">All time</option>';
-  html += months.map(m=>`<option value="${m}">${monthLabel(m)}</option>`).join('');
-  $('monthFilter').innerHTML = html;
-  $('monthFilter').value = months.includes(cur) || cur==='all' ? cur : 'all';
-}
-
-function render(){
-  buildMonthFilter();
-  const f = $('monthFilter').value;
-  const list = f==='all' ? txs : txs.filter(t=>t.date.slice(0,7)===f);
-  const scopeTxt = f==='all' ? '· all time' : '· '+monthLabel(f);
-  $('catScope').textContent = scopeTxt;
-  $('txScope').textContent = scopeTxt;
-
-  const inc = list.filter(t=>t.type==='inc').reduce((s,t)=>s+t.amount,0);
-  const exp = list.filter(t=>t.type==='exp').reduce((s,t)=>s+t.amount,0);
-  const net = inc - exp;
-  $('incVal').textContent = fmt(inc);
-  $('expVal').textContent = fmt(exp);
-  $('netVal').textContent = (net<0?'−':'')+fmt(Math.abs(net));
-  $('netVal').className = 'val ' + (net>=0?'pos':'neg');
-  $('netSub').textContent = exp>0 ? 'Return: '+(inc/exp*100).toFixed(0)+'% of spend recovered' : '';
-  $('incCount').textContent = list.filter(t=>t.type==='inc').length+' payments';
-  $('expCount').textContent = list.filter(t=>t.type==='exp').length+' expenses';
-
-  const byCat = {};
-  list.filter(t=>t.type==='exp').forEach(t=>{ byCat[t.cat]=(byCat[t.cat]||0)+t.amount; });
-  const entries = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
-  const max = entries.length ? entries[0][1] : 1;
-  $('catList').innerHTML = entries.length
-    ? entries.map(([c,v])=>`<div class="catrow"><div class="name">${c}</div><div class="bar"><i style="width:${(v/max*100).toFixed(1)}%"></i></div><div class="amt">${fmt(v)}</div></div>`).join('')
-    : '<div class="empty">No expenses in this period</div>';
-
-  const sorted = [...list].sort((a,b)=> b.date.localeCompare(a.date) || b.id - a.id);
-  $('txList').innerHTML = sorted.length
-    ? sorted.map(t=>`<div class="tx">
-        <div class="date">${t.date.slice(5).replace('-','/')}<br>${t.date.slice(0,4)}</div>
-        <div class="cat">${t.cat}</div>
-        <div class="note">${t.note ? t.note.replace(/</g,'&lt;') : ''}</div>
-        <div class="amt ${t.type}">${t.type==='inc'?'+':'−'}${fmt(t.amount)}</div>
-        <button class="del" data-id="${t.id}" title="Delete">✕</button>
-      </div>`).join('')
-    : '<div class="empty">No transactions yet. Add your first one above.</div>';
-}
-
-$('btnExp').onclick = ()=>setType('exp');
-$('btnInc').onclick = ()=>setType('inc');
-$('monthFilter').onchange = render;
-
-$('addBtn').onclick = ()=>{
-  const amt = parseFloat($('amtIn').value);
-  if(!amt || amt<=0){ $('amtIn').focus(); return; }
-  txs.push({
-    id: Date.now(),
-    type,
-    cat: $('catSel').value,
-    amount: amt,
-    date: $('dateIn').value || todayStr(),
-    note: $('noteIn').value.trim()
-  });
-  $('amtIn').value=''; $('noteIn').value='';
-  save(); render();
-};
-
-$('txList').onclick = e=>{
-  const btn = e.target.closest('.del');
-  if(!btn) return;
-  const id = Number(btn.dataset.id);
-  const t = txs.find(x=>x.id===id);
-  if(t && confirm('Delete '+(t.type==='inc'?'+':'−')+fmt(t.amount)+' ('+t.cat+')?')){
-    txs = txs.filter(x=>x.id!==id);
-    save(); render();
-  }
-};
-
-$('exportBtn').onclick = ()=>{
-  const blob = new Blob([JSON.stringify(txs, null, 1)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'mockmitra-ledger-backup-' + todayStr() + '.json';
-  a.click();
-  URL.revokeObjectURL(a.href);
-};
-
-$('importBtn').onclick = ()=> $('importFile').click();
-$('importFile').onchange = e=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  const r = new FileReader();
-  r.onload = ()=>{
-    try{
-      const data = JSON.parse(r.result);
-      if(!Array.isArray(data)) throw 0;
-      if(confirm('Replace current ' + txs.length + ' entries with ' + data.length + ' from backup?')){
-        txs = data; save(); render();
-      }
-    }catch(_){ alert('Not a valid backup file.'); }
-  };
-  r.readAsText(file);
-  e.target.value = '';
-};
-
-$('amtIn').addEventListener('keydown', e=>{ if(e.key==='Enter') $('addBtn').click(); });
-$('noteIn').addEventListener('keydown', e=>{ if(e.key==='Enter') $('addBtn').click(); });
-
-$('dateIn').value = todayStr();
-setType('exp');
-load();
-
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
-}
+const EXP_CATS=['Lovable','Gemini','GPT','Claude','Cloudinary','GoDaddy','Creator/Ads','Razorpay fees','Other'];
+const INC_CATS=['Starter ₹99','Pro ₹149','Elite ₹249','Annual','Other income'];
+const KEY='mockmitra-ledger-v1';
+let txs=[],type='exp',editingId=null,deleted=null,snackTimer=null,dateRange='all';
+const $=id=>document.getElementById(id);
+const fmt=n=>'₹'+Number(n).toLocaleString('en-IN',{maximumFractionDigits:2});
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function validDate(s){return /^\d{4}-\d{2}-\d{2}$/.test(s)&&!Number.isNaN(new Date(s+'T00:00:00').getTime())}
+function setType(t,selected){type=t;$('btnExp').className=t==='exp'?'on-exp':'';$('btnInc').className=t==='inc'?'on-inc':'';const cats=t==='exp'?EXP_CATS:INC_CATS;const values=selected&&!cats.includes(selected)?[selected,...cats]:cats;$('catSel').innerHTML=values.map(c=>`<option${c===selected?' selected':''}>${esc(c)}</option>`).join('')}
+function notify(message,actionLabel='',action=null,duration=3500){clearTimeout(snackTimer);$('snackText').textContent=message;const btn=$('snackAction');btn.hidden=!actionLabel;btn.textContent=actionLabel;btn.onclick=()=>{action?.();hideSnack()};$('snackbar').classList.add('show');snackTimer=setTimeout(hideSnack,duration)}
+function hideSnack(){$('snackbar').classList.remove('show')}
+function load(){try{const data=JSON.parse(localStorage.getItem(KEY));txs=Array.isArray(data)?data:[]}catch{txs=[]}updateStatus();render()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(txs));updateStatus('Saved');return true}catch{notify('Save failed — storage may be full');return false}}
+function updateStatus(prefix=''){ $('status').textContent=(prefix?prefix+' · ':'')+txs.length+' entries · stored on this device'}
+function monthLabel(m){const [y,mo]=m.split('-');return new Date(y,mo-1,1).toLocaleString('en-IN',{month:'short',year:'numeric'})}
+function buildMonthFilter(){const months=[...new Set(txs.filter(t=>validDate(t.date)).map(t=>t.date.slice(0,7)))].sort().reverse();const cur=$('monthFilter').value||'all';$('monthFilter').innerHTML='<option value="all">All time</option>'+months.map(m=>`<option value="${m}">${monthLabel(m)}</option>`).join('');$('monthFilter').value=months.includes(cur)||cur==='all'?cur:'all'}
+function baseList(){const month=$('monthFilter').value;let list=month==='all'?txs:txs.filter(t=>String(t.date).slice(0,7)===month);if(dateRange==='all')return list;const now=new Date(),today=todayStr();if(dateRange==='today')return list.filter(t=>t.date===today);if(dateRange==='week'){const start=new Date(now);start.setHours(0,0,0,0);start.setDate(now.getDate()-((now.getDay()+6)%7));return list.filter(t=>new Date(t.date+'T00:00:00')>=start&&new Date(t.date+'T00:00:00')<=now)}const current=today.slice(0,7);if(dateRange==='month')return list.filter(t=>String(t.date).slice(0,7)===current);const last=new Date(now.getFullYear(),now.getMonth()-1,1),key=last.getFullYear()+'-'+String(last.getMonth()+1).padStart(2,'0');return list.filter(t=>String(t.date).slice(0,7)===key)}
+function visibleList(){let list=baseList();const tf=$('typeFilter').value;if(tf!=='all')list=list.filter(t=>t.type===tf);const q=$('searchIn').value.trim().toLowerCase();if(q)list=list.filter(t=>[t.cat,t.note,t.amount,t.date].some(v=>String(v??'').toLowerCase().includes(q)));const sort=$('sortSel').value;return [...list].sort((a,b)=>sort==='oldest'?String(a.date).localeCompare(String(b.date))||a.id-b.id:sort==='highest'?b.amount-a.amount:sort==='lowest'?a.amount-b.amount:sort==='category'?String(a.cat).localeCompare(String(b.cat)):String(b.date).localeCompare(String(a.date))||b.id-a.id)}
+function highlight(value){const text=esc(value),q=$('searchIn').value.trim();if(!q)return text;const safe=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return text.replace(new RegExp(`(${safe})`,'ig'),'<mark>$1</mark>')}
+function render(){buildMonthFilter();const list=baseList(),shown=visibleList(),f=$('monthFilter').value,scope=dateRange!=='all'?'· '+({today:'today',week:'this week',month:'this month',lastMonth:'last month'}[dateRange]):f==='all'?'· all time':'· '+monthLabel(f);$('catScope').textContent=scope;$('txScope').textContent=scope;$('resultCount').textContent=shown.length+' shown';const incomes=list.filter(t=>t.type==='inc'),expenses=list.filter(t=>t.type==='exp'),inc=incomes.reduce((s,t)=>s+Number(t.amount),0),exp=expenses.reduce((s,t)=>s+Number(t.amount),0),net=inc-exp;$('incVal').textContent=fmt(inc);$('expVal').textContent=fmt(exp);$('netVal').textContent=(net<0?'−':'')+fmt(Math.abs(net));$('netVal').className='val '+(net>=0?'pos':'neg');$('netSub').textContent=exp?'Return: '+(inc/exp*100).toFixed(0)+'% recovered':'';$('incCount').textContent=incomes.length+' payments';$('expCount').textContent=expenses.length+' expenses';const days=new Set(list.map(t=>t.date)).size||1,largest=expenses.length?Math.max(...expenses.map(t=>Number(t.amount))):0;$('insights').innerHTML=`<div class="insight"><b>${fmt(exp/days)}</b><span>Avg spend / active day</span></div><div class="insight"><b>${fmt(inc/days)}</b><span>Avg income / active day</span></div><div class="insight"><b>${fmt(largest)}</b><span>Largest expense</span></div><div class="insight"><b>${list.length}</b><span>Transactions</span></div>`;renderCategories(list,exp);renderTransactions(shown)}
+function renderCategories(list,total){const by={};list.filter(t=>t.type==='exp').forEach(t=>by[t.cat]=(by[t.cat]||0)+Number(t.amount));const entries=Object.entries(by).sort((a,b)=>b[1]-a[1]);$('catList').innerHTML=entries.length?entries.map(([c,v])=>`<div class="catrow"><div class="name" title="${esc(c)}">${esc(c)}</div><div class="bar"><i style="width:${total?v/total*100:0}%"></i></div><div class="pct">${total?(v/total*100).toFixed(0):0}%</div><div class="amt">${fmt(v)}</div></div>`).join(''):'<div class="empty"><strong>No expenses</strong>Expense categories will appear here.</div>'}
+function renderTransactions(list){const hasFilters=$('searchIn').value||$('typeFilter').value!=='all';$('txList').innerHTML=list.length?list.map(t=>`<article class="tx" data-id="${t.id}"><div class="date">${esc(String(t.date).slice(5).replace('-','/'))}<br>${esc(String(t.date).slice(0,4))}</div><div class="cat">${highlight(t.cat)}</div><div class="note">${highlight(t.note||'')}</div><div class="amt ${t.type==='inc'?'pos':'neg'}">${t.type==='inc'?'+':'−'}${fmt(t.amount)}</div><button class="icon-btn edit" data-action="edit" aria-label="Edit ${esc(t.cat)} transaction" title="Edit">✎</button><button class="icon-btn del" data-action="delete" aria-label="Delete ${esc(t.cat)} transaction" title="Delete">×</button></article>`).join(''):`<div class="empty"><strong>${hasFilters?'No search results':'No transactions yet'}</strong>${hasFilters?'Try a different search or filter.':'Add your first transaction above.'}</div>`}
+function resetForm(){editingId=null;$('formCard').classList.remove('editing');$('submitBtn').textContent='Add';$('amtIn').value='';$('noteIn').value='';$('dateIn').value=todayStr();setType('exp')}
+function editTransaction(id){const t=txs.find(x=>x.id===id);if(!t)return;editingId=id;setType(t.type,t.cat);$('amtIn').value=t.amount;$('dateIn').value=t.date;$('noteIn').value=t.note||'';$('submitBtn').textContent='Save';$('formCard').classList.add('editing');$('formCard').scrollIntoView({behavior:'smooth',block:'nearest'});$('amtIn').focus()}
+function deleteTransaction(id,row){const index=txs.findIndex(x=>x.id===id);if(index<0)return;row?.classList.add('removing');setTimeout(()=>{deleted={item:txs[index],index};txs.splice(index,1);if(editingId===id)resetForm();save();render();notify('Transaction deleted','UNDO',()=>{if(!deleted)return;txs.splice(Math.min(deleted.index,txs.length),0,deleted.item);deleted=null;save();render();notify('Undo restored')},5000)},180)}
+$('txForm').addEventListener('submit',e=>{e.preventDefault();const amount=parseFloat($('amtIn').value),date=$('dateIn').value;if(!Number.isFinite(amount)||amount<=0){$('amtIn').focus();notify('Enter a valid amount');return}if(!validDate(date)){notify('Enter a valid date');return}const data={type,cat:$('catSel').value,amount,date,note:$('noteIn').value.trim()};if(editingId!==null){const i=txs.findIndex(t=>t.id===editingId);if(i<0)return resetForm();txs[i]={...txs[i],...data};save();resetForm();render();notify('Transaction updated')}else{txs.push({id:Date.now(),...data});save();resetForm();render();notify('Transaction added')}});
+$('btnExp').onclick=()=>setType('exp');$('btnInc').onclick=()=>setType('inc');$('cancelEdit').onclick=resetForm;$('monthFilter').onchange=()=>{dateRange='all';document.querySelectorAll('.chip').forEach(b=>b.classList.toggle('active',b.dataset.range==='all'));render()};$('typeFilter').onchange=render;$('sortSel').onchange=render;$('searchIn').addEventListener('input',render);
+$('quickFilters').addEventListener('click',e=>{const btn=e.target.closest('.chip');if(!btn)return;dateRange=btn.dataset.range;document.querySelectorAll('.chip').forEach(b=>b.classList.toggle('active',b===btn));render()});
+$('collapseCats').onclick=()=>{const collapsed=$('catsCard').classList.toggle('collapsed');$('collapseCats').textContent=collapsed?'Show':'Hide';$('collapseCats').setAttribute('aria-expanded',String(!collapsed))};
+$('fab').onclick=()=>{$('formCard').scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>$('amtIn').focus(),250)};
+$('txList').addEventListener('click',e=>{const btn=e.target.closest('[data-action]');if(!btn)return;const row=btn.closest('.tx'),id=Number(row.dataset.id);btn.dataset.action==='edit'?editTransaction(id):deleteTransaction(id,row)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&editingId!==null)resetForm()});
+function download(content,type,name){const url=URL.createObjectURL(new Blob([content],{type})),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),0)}
+$('exportBtn').onclick=()=>{download(JSON.stringify(txs,null,1),'application/json','mockmitra-ledger-backup-'+todayStr()+'.json');notify('Backup exported')};
+$('importBtn').onclick=()=>$('importFile').click();$('importFile').onchange=e=>{const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{const data=JSON.parse(r.result);if(!Array.isArray(data)||!data.every(t=>t&&['inc','exp'].includes(t.type)&&Number.isFinite(Number(t.amount))&&validDate(t.date)))throw Error();txs=data;save();resetForm();render();notify(data.length+' transactions imported')}catch{notify('Not a valid backup file')}};r.readAsText(file);e.target.value=''};
+function csvCell(v){return '"'+String(v??'').replace(/"/g,'""')+'"'}
+$('csvExportBtn').onclick=()=>{const rows=[['Date','Type','Category','Amount','Note'],...txs.map(t=>[t.date,t.type,t.cat,t.amount,t.note])];download('\ufeff'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n'),'text/csv;charset=utf-8','mockmitra-ledger-'+todayStr()+'.csv');notify('CSV exported')};
+function parseCSV(text){const rows=[];let row=[],cell='',quoted=false;for(let i=0;i<text.length;i++){const c=text[i];if(quoted&&c==='"'&&text[i+1]==='"'){cell+='"';i++}else if(c==='"'){quoted=!quoted}else if(c===','&&!quoted){row.push(cell);cell=''}else if((c==='\n'||c==='\r')&&!quoted){if(c==='\r'&&text[i+1]==='\n')i++;row.push(cell);if(row.some(v=>v.trim()))rows.push(row);row=[];cell=''}else cell+=c}row.push(cell);if(row.some(v=>v.trim()))rows.push(row);return rows}
+$('csvImportBtn').onclick=()=>$('csvFile').click();$('csvFile').onchange=e=>{const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{const rows=parseCSV(String(r.result).replace(/^\ufeff/,'')),head=rows.shift().map(h=>h.trim().toLowerCase()),idx=n=>head.indexOf(n);if(['date','type','category','amount','note'].some(n=>idx(n)<0))throw Error();let imported=0,skipped=0;const used=new Set(txs.map(t=>String(t.id)));for(const row of rows){const amount=Number(row[idx('amount')]),date=(row[idx('date')]||'').trim(),kind=(row[idx('type')]||'').trim().toLowerCase();if(!Number.isFinite(amount)||amount<=0||!validDate(date)||!['inc','exp'].includes(kind)){skipped++;continue}let id=Date.now()+imported;while(used.has(String(id)))id++;used.add(String(id));txs.push({id,type:kind,cat:(row[idx('category')]||'Other').trim()||'Other',amount,date,note:(row[idx('note')]||'').trim()});imported++}save();render();notify(`${imported} imported · ${skipped} skipped`, '', null,5000)}catch{notify('CSV needs Date, Type, Category, Amount and Note columns')}};r.readAsText(file);e.target.value=''};
+function networkStatus(){const on=navigator.onLine;$('network').textContent=on?'Online':'Offline';$('network').classList.toggle('offline',!on)}window.addEventListener('online',networkStatus);window.addEventListener('offline',networkStatus);
+$('dateIn').value=todayStr();setType('exp');networkStatus();load();
+if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>notify('Offline setup unavailable'));
 </script>
 </body>
 </html>
